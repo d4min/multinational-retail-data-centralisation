@@ -1,1 +1,3 @@
 class DataExtractor:
+
+    pass
