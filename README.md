@@ -32,4 +32,28 @@ git clone git clone https://github.com/d4min/multinational-retail-data-centralis
 
     1. The DataCleaning class which will include methods to clean the data from the various sources. 
 
+- Created the following methods in the DatabaseConnector class which will be used to connect and retrieve data from the AWS database:
+
+    1. read_db_creds(): read the AWS database credentials from a YAML file and return a python dictionary of said credentials. 
+
+    1. init_db_engine(): uses the read_db_cred() method to retrieve database credentials and uses these to initialise and return a SQLalchemy engine cononecting to the database.
+
+    1. list_db_tables(): lists the tables present in the AWS database.
+
+    1. upload_to_db(): takes in a pandas dataframe and table name and uploads them to the local sales_db database setup within pgadmin4
+
+- Created the following method in the DatabaseExtractor class: 
+
+    1. read_rds_table(): extracts the database table to a pandas dataframe. 
+
+- Created the following method in the DataCleaning class:
+
+    1. clean_user_data(): performs the cleaning of the user data. Taking into consideration NULL values, errors with dates, incomplete rows and rows filled with the wrong information.
+
+
+ 
+
+
+
+
 

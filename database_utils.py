@@ -19,7 +19,6 @@ class DatabaseConnector:
 
         db_creds = self.read_db_creds('aws_db_creds.yaml')
         engine = create_engine(f"postgresql+psycopg2://{db_creds['RDS_USER']}:{db_creds['RDS_PASSWORD']}@{db_creds['RDS_HOST']}:{db_creds['RDS_PORT']}/{db_creds['RDS_DATABASE']}")
-        engine.connect()
 
         return engine
 
@@ -33,4 +32,5 @@ class DatabaseConnector:
 
         print(table_names)
 
-        
+
+
