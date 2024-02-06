@@ -1,8 +1,10 @@
 from database_utils import *  
 import pandas as pd
+import tabula
 
 class DataExtractor:
 
+    # reads in a specified table from the AWS database as a panda's dataframe
     def read_dbs_table(self, db_connector, table):
         engine = db_connector.init_db_engine()
 
@@ -11,5 +13,12 @@ class DataExtractor:
         
         return table_df
     
+    # reads in data from a specified pdf file as a panda's  dataframe
+    def retrive_pdf_data(self, link):
+
+        table = tabula.read_pdf(link, pages='all')
+        table_df = pd.concat(table)
+
+        return table_df
 
 

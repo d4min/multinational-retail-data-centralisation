@@ -20,7 +20,7 @@ I will then query the database to get up-to-date metrics for business.
 git clone git clone https://github.com/d4min/multinational-retail-data-centralisation.git
 ```
 
-## Milestone 2
+## Milestone 2 Task 1, 2, 3
 
 - Set up a database 'sales_data' within pgadmin4. This database will store all the company information once I extract it from various data sources. 
 
@@ -50,6 +50,34 @@ git clone git clone https://github.com/d4min/multinational-retail-data-centralis
 
     1. clean_user_data(): performs the cleaning of the user data. Taking into consideration NULL values, errors with dates, incomplete rows and rows filled with the wrong information.
 
+## Milestone 2 Task 4
+
+- Created the method 'retrieve_pdf_data' in the DataExtractor class which uses the tabula-py library to extract data from a pdf file into a pandas dataframe. 
+
+```python
+def retrive_pdf_data(self, link):
+
+        table = tabula.read_pdf(link, pages='all')
+        table_df = pd.concat(table)
+
+        return table_df
+```
+- Created the method 'clean_card_details' in the DataCleaning class to clean the card details data so it is ready to be uploaded to the postgres database.
+
+- Used the upload_to_db method in the DatabaseConnector class to store the cleaned card details in the postgres database
+
+```python
+def upload_to_db(self, df, table_name):
+        
+        # uses read_db_creds method to read the sales_data database credentials
+        db_creds = self.read_db_creds('sales_data_creds.yaml')
+
+        engine = create_engine(f"postgresql+psycopg2://{db_creds['RDS_USER']}:{db_creds['RDS_PASSWORD']}@{db_creds['RDS_HOST']}:{db_creds['RDS_PORT']}/{db_creds['RDS_DATABASE']}")
+        df.to_sql(table_name, engine, if_exists='replace', index=False, index_label='index')
+
+db_connect = DatabaseConnector()
+db_connet.upload_to_db(table, 'dim_card_details)
+```
 
  
 
