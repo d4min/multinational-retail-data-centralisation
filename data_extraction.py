@@ -1,4 +1,5 @@
-from database_utils import *  
+from database_utils import DatabaseConnector
+from sqlalchemy import create_engine, text, inspect
 import pandas as pd
 import tabula
 
@@ -14,7 +15,7 @@ class DataExtractor:
         return table_df
     
     # reads in data from a specified pdf file as a panda's  dataframe
-    def retrive_pdf_data(self, link):
+    def retrieve_pdf_data(self, link):
 
         table = tabula.read_pdf(link, pages='all')
         table_df = pd.concat(table)

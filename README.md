@@ -76,7 +76,7 @@ def upload_to_db(self, df, table_name):
         df.to_sql(table_name, engine, if_exists='replace', index=False, index_label='index')
 
 db_connect = DatabaseConnector()
-db_connet.upload_to_db(table, 'dim_card_details)
+db_connect.upload_to_db(table, 'dim_card_details)
 ```
 
  
