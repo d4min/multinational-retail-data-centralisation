@@ -80,7 +80,7 @@ db_connect.upload_to_db(table, 'dim_card_details)
 ```
 ## Milestone 2 Task 5
 
-Task 5 is concerned with retrieving the store data throught the use of an API, cleaning and storing it in the postgres database.
+Task 5 is concerned with retrieving the store data through the use of an API, cleaning and storing it in the postgres database.
 
 - Created the method 'list_number_of_stores' in the DataExtractor class which sends a GET request to the endpoint storing the number of stores there are. Through this I will know how many stores need to be extracted from the API.
 
@@ -133,7 +133,41 @@ def retrieve_stores_data(self, endpoint):
 
     return store_data_df
 ```
+- Created the method clean_store_details in the DataCleaning class which cleans the store details and uploads the clean pandas dataframe to postgres
 
+```python
+# sets the index of the pandas dataframe 
+table.set_index('index', inplace=True)
+
+# removes 'lat' column which is not needed and is only filled with null values 
+table.drop('lat', axis=1, inplace=True)
+
+# some of the values in the continent column have an error where they begin with 'ee' but are otherwise correct. This removes the 'ee' substring from those rows. 
+table['continent'] = table['continent'].str.replace('ee', '')
+
+# changes 'country_code', 'continent' and 'store_type' columns data type to category
+table['country_code'] = table['country_code'].astype('category')
+table['continent'] = table['continent'].astype('category')
+table['store_type'] = table['store_type'].astype('category')
+
+# Defines a set of valid country codes and removes rows where the column entry does not match these. This removes rows filled with null values and incorrect data. 
+country_codes = {'GB', 'US', 'DE'}
+inconsistent_categories = set(table['country_code']) - country_codes
+inconsistent_rows = table['country_code'].isin(inconsistent_categories)
+table = table[~inconsistent_rows]   
+
+# removes any alphabetical characters from rows in the staff_numbers column using a regular expression so they are ready to be converted to data type int
+table['staff_numbers'] = table['staff_numbers'].str.replace(r"[a-zA-z]", '')
+
+# changes the staff_numbers data type to numberic so it can used for calculations
+table['staff_numbers'] = pd.to_numeric(table['staff_numbers'])
+
+# uses to_datetime() method to correct date entries in the opening_date column and changes the column data type to datetime
+table['opening_date'] = pd.to_datetime(table['opening_date'], infer_datetime_format=True, errors='coerce')
+table['opening_date'] = table['opening_date'].astype('datetime64[ns]')
+# removes timestamp from column as only the date is required 
+table['opening_date'] = table['opening_date'].dt.date
+```
 
 
 
