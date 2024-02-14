@@ -78,6 +78,65 @@ def upload_to_db(self, df, table_name):
 db_connect = DatabaseConnector()
 db_connect.upload_to_db(table, 'dim_card_details)
 ```
+## Milestone 2 Task 5
+
+Task 5 is concerned with retrieving the store data throught the use of an API, cleaning and storing it in the postgres database.
+
+- Created the method 'list_number_of_stores' in the DataExtractor class which sends a GET request to the endpoint storing the number of stores there are. Through this I will know how many stores need to be extracted from the API.
+
+```python
+def list_number_of_stores(self, endpoint):
+
+    url = endpoint 
+
+    # reads in the x-api-key needed for authorisation and saves it as 'headers' which will be sent with the request
+    connect = DatabaseConnector()
+    headers = connect.read_db_creds('api_key.yaml')
+
+    response = requests.get(url, headers=headers)
+
+    data = response.json()
+    number_of_stores = data['number_stores']
+
+    return number_of_stores
+```
+
+- Defined the method 'retrieve_store_data' in the same class which uses a for loop to first change the {store_number} parameter in the API endpoint to the required store index and then retrieves it. 
+
+- Each store is stored in the store_details list as a dictionary, this is then used to create a pandas dataframe. 
+
+```python
+def retrieve_stores_data(self, endpoint):
+
+    url = endpoint
+
+    connect = DatabaseConnector()
+    headers = connect.read_db_creds('api_key.yaml')
+
+    # calls the list_number_of_stores method to retrieve the amount of stores 
+    number_of_stores = self.list_number_of_stores('https://aqj7u5id95.execute-api.eu-west-1.amazonaws.com/prod/number_stores')
+
+    # empty list which will store each of the store details as a dictionory. This will be used to create the dataframe
+    stores_list = []
+
+    # sends a get request for each store 
+    for i in range(number_of_stores):
+        
+        # replaces the parameter '{store_number}' for i which is a store index
+        new_url = url.replace('{store_number}', str(i))
+        response = requests.get(new_url, headers=headers)
+        data = response.json() 
+        stores_list.append(data)
+
+    # creates a pandas dataframe from the list of dictionaries storing store details 
+    store_data_df = pd.DataFrame(stores_list)
+
+    return store_data_df
+```
+
+
+
+
 
  
 
