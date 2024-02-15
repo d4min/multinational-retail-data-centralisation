@@ -113,8 +113,57 @@ class DataCleaning:
         table['opening_date'] = table['opening_date'].dt.date
 
         # creates an instance of the DatabaseConnector class to upload the cleaned table to postgres
+        #db_connect = DatabaseConnector()
+        #db_connect.upload_to_db(table, 'dim_store_details')
+
+        return table
+
+    def convert_product_weights(self, table):
+
+        table['weight'] = table['weight'].astype(str)
+        
+        def convert_to_kg(value): 
+            
+            if 'x' in value:
+                x_index = value.index('x')
+                value = value[x_index + 1:]
+
+            value = re.sub('\D', '', value)
+            
+            if 'kg' in value:
+               value = value.replace('kg', '')
+            elif 'ml' in value:
+                value = value.replace('ml', '')
+                value = float(value) / 1000 
+            elif 'g' in value and 'k' not in value:
+                value = value.replace('g', '')
+                value = float(value) / 1000
+            
+            return value 
+
+        table['weight'] = table['weight'].apply(convert_to_kg)
+
+        return table
+
+    def clean_products_data(self):
+
+        extractor = DataExtractor()
+        table = extractor.extract_from_s3('s3://data-handling-public/products.csv')
+
+        table = self.convert_product_weights(table)
+
+
         db_connect = DatabaseConnector()
-        db_connect.upload_to_db(table, 'dim_store_details')
+        db_connect.upload_to_db(table, 'dim_products')
+
+        return table
+
+
+cleaner = DataCleaning()
+
+table = cleaner.clean_products_data()
+print(table.head())
+
 
 
 

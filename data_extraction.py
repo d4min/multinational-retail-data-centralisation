@@ -4,6 +4,7 @@ import pandas as pd
 import tabula
 import requests
 import json
+import boto3
 
 class DataExtractor:
 
@@ -67,6 +68,23 @@ class DataExtractor:
         store_data_df = pd.DataFrame(stores_list)
 
         return store_data_df
+
+
+    # uses the boto3 package to extract a csv file from an s3 bucket which is then used to create a dataframe of the products
+    def extract_from_s3(self, s3_address):
+        
+        # splits s3 address to retrieve the bucket name and object key 
+        address_list = s3_address.split('/')
+
+        s3 = boto3.client('s3')
+        s3.download_file(address_list[-2], address_list[-1], '/Users/dns/AiCore/AiCore-Final/multinational-retail-data-centralisation/products.csv')
+
+        # creates pandas dataframe 
+        products_df = pd.read_csv('products.csv')
+
+        return products_df
+
+        
 
 
 
