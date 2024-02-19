@@ -113,23 +113,34 @@ class DataCleaning:
         table['opening_date'] = table['opening_date'].dt.date
 
         # creates an instance of the DatabaseConnector class to upload the cleaned table to postgres
-        #db_connect = DatabaseConnector()
-        #db_connect.upload_to_db(table, 'dim_store_details')
+        db_connect = DatabaseConnector()
+        db_connect.upload_to_db(table, 'dim_store_details')
 
         return table
 
-    def convert_product_weights(self, table):
 
+    #  A function to clean the weight series from the dataframe so it is usable for calculations.
+    def convert_product_weights(self, table):
+        
+        # sets the column data type to string so because string methods are needed for some of the cleaning
         table['weight'] = table['weight'].astype(str)
         
+        # this is the method that will be used in the pd.apply() call
         def convert_to_kg(value): 
             
+            # some of the weight entries in the table dealing with food items are stored as '12 x 100g'. This if statement deals with them, first by removing the 'g' and then multiplying to get the total weight
             if 'x' in value:
-                x_index = value.index('x')
-                value = value[x_index + 1:]
 
-            value = re.sub('\D', '', value)
+                x_index = value.index('x')
+                value = value.replace('g', '')
+                value = int(value[:x_index - 1]) * int(value[x_index + 2:])
+                
+                value = str(value)
+
+            # there are some weight entries with decimal points in weird places e.g. '77  .' which causes an error when trying to treat the value as a float due to the spaces between the integer and the decimal point. This regular expression removes everything but digits, decimal points and the weight metrics from the string. 
+            value = re.sub('[^0123456789\.kgml]', '', value)
             
+            # this if statement removes the weight metric and converts ml and g to kg.
             if 'kg' in value:
                value = value.replace('kg', '')
             elif 'ml' in value:
@@ -138,31 +149,34 @@ class DataCleaning:
             elif 'g' in value and 'k' not in value:
                 value = value.replace('g', '')
                 value = float(value) / 1000
+
             
             return value 
 
         table['weight'] = table['weight'].apply(convert_to_kg)
-
+    
         return table
 
+    # cleans the products data and stores it in our local database.
     def clean_products_data(self):
 
+        # creates a dataextractor instance which calls the extract_from_s3 method from that class
         extractor = DataExtractor()
         table = extractor.extract_from_s3('s3://data-handling-public/products.csv')
 
+        # calls the method which cleans the weights column
         table = self.convert_product_weights(table)
-
-
+        
+        # uploads the cleaned table to postgres
         db_connect = DatabaseConnector()
         db_connect.upload_to_db(table, 'dim_products')
 
         return table
 
 
-cleaner = DataCleaning()
 
-table = cleaner.clean_products_data()
-print(table.head())
+
+
 
 
 
