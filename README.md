@@ -168,9 +168,42 @@ table['opening_date'] = table['opening_date'].astype('datetime64[ns]')
 # removes timestamp from column as only the date is required 
 table['opening_date'] = table['opening_date'].dt.date
 ```
+## Milestone 2 Task 6
+
+Task 6 works on retrieving the product data which is stored in a csv file in an aws s3 bucket. 
+
+- Created the method 'extract_from_s3()' in the DataExtractor class which uses the boto3 library to download the csv file stored in an s3 bucket and then convert it to a pandas dataframe ready for cleaning. 
+
+- For this step there were two methods required for the cleaning of product data: 'convert_product_weights()' as well as the normal 'clean_product_data()'. This is due to the product weights being stored in several different types of units e.g. kg, g, ml. These needed to be converted to kg and stored as floats so they can be used in calculations. 
+
+    - There were several steps pertaining to converting the product weights. The first course of action was to deal with the multipack product weights which were stored in a different format from the rest: '12 x 100g'. These entries needed to first be multiplied to get the total product weight and then converted to kg. This was done using an if statement. 
+
+    ```python
+    if 'x' in value:
+
+        x_index = value.index('x')
+        value = value.replace('g', '')
+        # uses string slicing to isolate the two integers which need to be multiplied
+        value = int(value[:x_index - 1]) * int(value[x_index + 2:])
+        value = float(value) / 1000
+    ```
+
+    - After multipack items were dealt with it was just a case of removing the units from entries and converting all of them to kg. Which was done in a similar manner to above where the string method .replace() was used to remove unit and then float(value) / 1000 to convert to the grams and millileter values to kg. Before passing these values through another if statement it was necessary to use a regular expression to remove some erroneous spacing between the values which was causing an error and not allowing the entries to be treated as float values, for example, there was a value stored as '77   .'
+
+    ```python
+    value = re.sub('[^0123456789\.kgml]', '', value)
+    ```
 
 
+    - Lastly all of the values in the 'weight' column were stored as floats
 
+    ```python
+    table['weight'] = table['weight'].astype(float)
+    ```
+
+- With the weight column in the table now in the correct format, the 'clean_products_data()' dealt with any remaining cleaning required such as removing null and incorrect rows and changing the column datatypes to the correct type e.g. category, datetime.
+
+- After all cleaning tasks were complete the table is uploaded to postgres. 
 
  
 

@@ -126,7 +126,7 @@ class DataCleaning:
         # this is the method that will be used in the pd.apply() call
         def convert_to_kg(value): 
             
-            # some of the weight entries in the table dealing with food items are stored as '12 x 100g'. This if statement deals with them, first by removing the 'g' and then multiplying to get the total weight and then converting to kg
+            # some of the weight entries in the table dealing with multipack items are stored as '12 x 100g'. This if statement deals with them, first by removing the 'g' and then multiplying to get the total weight and then converting to kg
             if 'x' in value:
 
                 x_index = value.index('x')
