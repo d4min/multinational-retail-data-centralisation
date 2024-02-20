@@ -178,6 +178,7 @@ Task 6 works on retrieving the product data which is stored in a csv file in an 
 
     - There were several steps pertaining to converting the product weights. The first course of action was to deal with the multipack product weights which were stored in a different format from the rest: '12 x 100g'. These entries needed to first be multiplied to get the total product weight and then converted to kg. This was done using an if statement. 
 
+
     ```python
     if 'x' in value:
 
@@ -190,12 +191,14 @@ Task 6 works on retrieving the product data which is stored in a csv file in an 
 
     - After multipack items were dealt with it was just a case of removing the units from entries and converting all of them to kg. Which was done in a similar manner to above where the string method .replace() was used to remove unit and then float(value) / 1000 to convert to the grams and millileter values to kg. Before passing these values through another if statement it was necessary to use a regular expression to remove some erroneous spacing between the values which was causing an error and not allowing the entries to be treated as float values, for example, there was a value stored as '77   .'
 
+
     ```python
     value = re.sub('[^0123456789\.kgml]', '', value)
     ```
 
 
     - Lastly all of the values in the 'weight' column were stored as floats
+
 
     ```python
     table['weight'] = table['weight'].astype(float)
