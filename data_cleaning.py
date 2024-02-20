@@ -73,6 +73,7 @@ class DataCleaning:
         db_connect = DatabaseConnector()
         db_connect.upload_to_db(table, 'dim_card_details')
 
+
     # cleans the store data retrieved through an API 
     def clean_store_data(self):
         
@@ -116,9 +117,6 @@ class DataCleaning:
         db_connect = DatabaseConnector()
         db_connect.upload_to_db(table, 'dim_store_details')
 
-        return table
-
-
     #  A function to clean the weight series from the dataframe so it is usable for calculations.
     def convert_product_weights(self, table):
         
@@ -128,12 +126,13 @@ class DataCleaning:
         # this is the method that will be used in the pd.apply() call
         def convert_to_kg(value): 
             
-            # some of the weight entries in the table dealing with food items are stored as '12 x 100g'. This if statement deals with them, first by removing the 'g' and then multiplying to get the total weight
+            # some of the weight entries in the table dealing with food items are stored as '12 x 100g'. This if statement deals with them, first by removing the 'g' and then multiplying to get the total weight and then converting to kg
             if 'x' in value:
 
                 x_index = value.index('x')
                 value = value.replace('g', '')
                 value = int(value[:x_index - 1]) * int(value[x_index + 2:])
+                value = float(value) / 1000
                 
                 value = str(value)
 
@@ -154,6 +153,7 @@ class DataCleaning:
             return value 
 
         table['weight'] = table['weight'].apply(convert_to_kg)
+        table['weight'] = table['weight'].astype(float)
     
         return table
 
@@ -164,15 +164,31 @@ class DataCleaning:
         extractor = DataExtractor()
         table = extractor.extract_from_s3('s3://data-handling-public/products.csv')
 
+        # original index was zero based, used this to change it to start at 1 
+        table.index = table.index + 1
+
+        # changes the 'category' and 'removed' tables to type category 
+        table['category'] = table['category'].astype('category')
+        table['removed'] = table['removed'].astype('category')
+
+        # defines a set of valid product categories and removes rows with inconsistent values. 
+        categories = {'toys-and-games', 'sports-and-leisure', 'pets', 'homeware', 'health-and-beauty', 'food-and-drink', 'diy'}
+        inconsistent_categories = set(table['category']) - categories
+        inconsistent_rows = table['category'].isin(inconsistent_categories)
+        table = table[~inconsistent_rows]
+
+        # uses to_datetime() method to correct date entries for 'date_added' column and changes the datatype to datetime64'
+        table['date_added'] = pd.to_datetime(table['date_added'], infer_datetime_format=True, errors='coerce')
+        table['date_added'] = table['date_added'].astype('datetime64[ns]')
+        # removes timestamp from column as only the date is required 
+        table['date_added'] = table['date_added'].dt.date
+        
         # calls the method which cleans the weights column
         table = self.convert_product_weights(table)
         
         # uploads the cleaned table to postgres
         db_connect = DatabaseConnector()
         db_connect.upload_to_db(table, 'dim_products')
-
-        return table
-
 
 
 
