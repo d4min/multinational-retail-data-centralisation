@@ -190,8 +190,24 @@ class DataCleaning:
         db_connect = DatabaseConnector()
         db_connect.upload_to_db(table, 'dim_products')
 
+    # cleans the orders_data table from the legacy database and uploads it to postgres
+    def clean_orders_data(self):
+        
+        # creates an instance of the DatabaseConnector and DataExtractor class which will be used to extract the rds table and upload it to postgres
+        db_connect = DatabaseConnector()
+        extractor = DataExtractor()
+        table = extractor.read_dbs_table(db_connect, 'orders_table')
 
+        # there is already an index in the dataset so this sets the df index to that column
+        table.set_index('index', inplace=True)
 
+        # drops the 'level_0', 'first_name', 'last_name' and '1' columns which are not needed 
+        table.drop(['level_0', 'first_name', 'last_name', '1'], axis='columns', inplace=True)
+
+        # uploads the cleaned data to postgres
+        db_connect.upload_to_db(table, 'orders_table')
+
+    
 
 
 
