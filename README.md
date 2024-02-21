@@ -208,7 +208,14 @@ Task 6 works on retrieving the product data which is stored in a csv file in an 
 
 - After all cleaning tasks were complete the table is uploaded to postgres. 
 
- 
+ ## Milestone 2 Task 7 and 8
+
+ The last two steps of milestone 2 extract and clean two more tables: the orders_table which contains information about all orders the company has made in the past; the date_times table which includes information about the data and time of these orders. The orders_table is stored in an AWS relational database, this is extracted using the read_rds_table method developed during step 2 and then cleaned. The date_times data is stored as a json file stored in an s3 bucket, this is extracted using the read_json() method from the pandas library
+
+ ```python
+table = pd.read_json('https://data-handling-public.s3.eu-west-1.amazonaws.com/date_details.json')
+```
+
 
 
 

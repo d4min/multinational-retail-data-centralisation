@@ -207,13 +207,50 @@ class DataCleaning:
         # uploads the cleaned data to postgres
         db_connect.upload_to_db(table, 'orders_table')
 
-    
-
-
-
-
-
+    def clean_date_events_data(self):
         
+        # reads in the json file as a pandas dataframe
+        table = pd.read_json('https://data-handling-public.s3.eu-west-1.amazonaws.com/date_details.json')
+
+        # changes the time_period column to category data type
+        table['time_period'] = table['time_period'].astype('category')
+
+        # creates a valid list of categories and drops rows with values that aren't in the set. This removes rows with null and inconsistent values. 
+        categories = {'Evening', 'Midday', 'Morning', 'Late_Hours'}
+        inconsistent_categories = set(table['time_period']) - categories
+        inconsistent_rows = table['time_period'].isin(inconsistent_categories)
+        table = table[~inconsistent_rows]
+
+        # changes the timestamp, month, day and year columns to datetime64[ns]
+        table['timestamp'] = pd.to_datetime(table['timestamp'], infer_datetime_format=True, errors='coerce')
+        table['timestamp'] = table['timestamp'].astype('datetime64[ns]')
+        table['timestamp'] = table['timestamp'].dt.time
+
+        table['month'] = pd.to_datetime(table['month'], format='%m')
+        table['month'] = table['month'].astype('datetime64[ns]')
+        table['month'] = table['month'].dt.month
+        
+        table['year'] = pd.to_datetime(table['year'], format='%Y')
+        table['year'] = table['year'].astype('datetime64[ns]')
+        table['year'] = table['year'].dt.year
+        
+        table['day'] = pd.to_datetime(table['day'], format='%d')
+        table['day'] = table['day'].astype('datetime64[ns]')
+        table['day'] = table['day'].dt.day
+
+        # uploads cleaned data to postgres
+        db_connect = DatabaseConnector()
+        db_connect.upload_to_db(table, 'dim_date_times')
+
+        return table
+
+cleaner = DataCleaning()
+
+table = cleaner.clean_date_events_data()
+
+print(table.head())
+print(table.dtypes)
+
 
 
     
