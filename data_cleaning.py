@@ -35,6 +35,8 @@ class DataCleaning:
         # removes timestamp from column as only the date is required 
         table['join_date'] = table['join_date'].dt.date
 
+        table.drop('index', axis='columns', inplace=True)
+
         # uploads the cleaned user details to the local postgres database
         db_connect.upload_to_db(table, 'dim_users')
 
@@ -242,14 +244,9 @@ class DataCleaning:
         db_connect = DatabaseConnector()
         db_connect.upload_to_db(table, 'dim_date_times')
 
-        return table
 
-cleaner = DataCleaning()
 
-table = cleaner.clean_date_events_data()
 
-print(table.head())
-print(table.dtypes)
 
 
 
