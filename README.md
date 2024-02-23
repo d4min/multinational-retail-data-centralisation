@@ -216,6 +216,79 @@ Task 6 works on retrieving the product data which is stored in a csv file in an 
 table = pd.read_json('https://data-handling-public.s3.eu-west-1.amazonaws.com/date_details.json')
 ```
 
+## Milestone 3
+
+In this step I focused on developing the star based schema of the database and ensuring all columns are of the correct data types to ensure efficient and robust querying. 
+
+- The ALTER TABLE sql keyword was used to make changes to the column data types in each table
+
+    ```sql
+        ALTER TABLE {table_name}
+        ALTER COLUMN {column_name} TYPE {type};
+    ```
+    The data types used in the database include: UUID; VARCHAR(); SMALLINT and DATE
+
+- In the dim_products table I added an additional column weight_class which provides a human readable weight class value to quickly classify a products weight. This is useful for when deciding the best delivery methods for said product. 
+
+    First I created the new column in the dim_products table:
+
+    ```sql
+        ALTER TABLE dim_products
+            ADD COLUMN IF NOT EXISTS weight_class VARCHAR(14);
+    ```
+
+    After the column was created I populated it using an UPDATE statement:
+
+    ```sql
+        UPDATE 
+            dim_products
+        SET
+            weight_class = (
+                CASE WHEN 
+                    weight  < 2 THEN 'Light'
+                WHEN
+                    weight >= 2 AND weight < 40 THEN 'Mid_Sized'
+                WHEN 
+                    weight >= 40 AND weight < 140 THEN 'Heavy'
+                ELSE
+                    'Truck_Required'
+                END)
+            );
+    ```
+
+    I used the CASE WHEN operator in sql which acts similar to an if statement to check the weight and then issue an appropriate classification.
+
+    The product_price column in the dim_products table also needed to be ammended to remove the '£' sign from all the values so the column type to be changed to float for calculations. This was done using an update statement.
+
+    ```sql
+        UPDATE 
+            dim_products
+        SET
+            product_price = REPLACE(product_price, '£', '')
+    ```
+    
+    I also updated the 'removed' column, replacing the values to True and False instead of still_available and removed. 
+
+- After all the table columns have been cast to the appropriate data types the next step is to create the primary and foreign key relationships between the tables. 
+
+    The orders_table acts as the central table in our schema which is referenced by each of the dim tables. To achieve this I set the relevant columns in each of the dim tables as the primary key. 
+
+    ```sql
+        ALTER TABLE {table_name}
+        ADD PRIMARY KEY {primary_key}
+    ```
+
+    After the primary keys have been set up in each of the dim tables, the orders_table has to be updated to set the foreign keys. 
+
+    ```sql
+        ALTER TABLE orders_table
+        ADD FOREIGN KEY {key} REFERENCES {table_name({key})}
+    ```
+
+    
+
+
+
 
 
 
