@@ -248,11 +248,3 @@ class DataCleaning:
 
 
 
-
-cleaner = DataCleaning()
-
-cleaner.clean_products_data()
-
-
-
-
