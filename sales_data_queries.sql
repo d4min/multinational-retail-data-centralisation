@@ -145,11 +145,7 @@ FROM dim_date_times)
 
 SELECT
 	year, 
-	AVG(next_sale - sale) AS average,
-	date_part('hour', avg(next_sale - sale)) AS hour,
-	date_part('minute', avg(next_sale - sale)) AS minute,
-	date_part('second', avg(next_sale - sale)) AS second,
-	date_part('millisecond', avg(next_sale - sale)) AS millisecond
+	AVG(next_sale - sale) AS actual_time_taken
 FROM 
 	next_sale
 INNER JOIN 
@@ -157,8 +153,8 @@ INNER JOIN
 GROUP BY 
 	year
 ORDER BY 
-	average DESC
-LIMIT 5
+	actual_time_taken DESC
+LIMIT 5;
 
 
 
