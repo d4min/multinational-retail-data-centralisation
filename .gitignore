@@ -162,3 +162,4 @@ cython_debug/
 aws_db_creds.yaml
 sales_data_creds.yaml
 api_key.yaml
+.vscode
