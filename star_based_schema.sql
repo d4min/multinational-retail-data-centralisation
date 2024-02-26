@@ -193,7 +193,7 @@ ADD FOREIGN KEY (date_uuid) REFERENCES dim_date_times(date_uuid);
 DELETE FROM orders_table
 WHERE card_number NOT IN (
     SELECT card_number FROM dim_card_details
-)
+);
 
 ALTER TABLE orders_table
 ADD FOREIGN KEY (card_number) REFERENCES dim_card_details(card_number);
