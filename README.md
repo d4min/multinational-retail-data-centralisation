@@ -285,9 +285,101 @@ In this step I focused on developing the star based schema of the database and e
         ADD FOREIGN KEY {key} REFERENCES {table_name({key})}
     ```
 
-    
+## Milestone 4
 
+Milestone 4 is concerned with querying the database we have constructed to extract useful data for business decisions. During this step I used SQL to query the database. 
 
+Some of the key SQL functions and tools I used to achieve this are listed below:
+
+- I used aggregation functions such as COUNT() and SUM() to work out things such as how many sales the company has made and the total amount of these sales.
+
+```sql
+SELECT country_code, 
+    COUNT(store_code) AS total_no_stores
+FROM 
+    dim_store_details
+GROUP BY 
+    country_code
+ORDER BY 
+    total_no_stores DESC;
+```
+
+In the above query used the COUNT() function to ascertain the amount of stores the company has in different countries. 
+
+- Another tool I used a lot during my queries were SQL Joins to connect multiple tables together to be able to use them in my queries. 
+
+```sql
+SELECT 
+    SUM(product_quantity * product_price) AS total_sales, 
+    month
+FROM   
+    orders_table
+INNER JOIN
+    dim_products ON orders_table.product_code = dim_products.product_code
+INNER JOIN 
+    dim_date_times ON orders_table.date_uuid = dim_date_times.date_uuid
+GROUP BY
+    month
+ORDER BY 
+    total_sales DESC;
+```
+
+The query above demonstrates the use of joins where I joined the orders_table with the dim_products and dim_date_times table to be able to ascertain which months produced the largest amount of sales. 
+
+- I also used subqueries, which were especially useful when trying to calculate the percentage of sales that came through each type of store in the business. 
+
+```sql
+SELECT
+    store_type,
+    ROUND(SUM(product_price * product_quantity)::numeric, 2) AS total_sales,
+
+    ROUND((SUM(product_quantity * product_price) * 100)::numeric / (
+        SELECT
+            SUM(product_quantity * product_price)
+        FROM 
+            orders_table
+        INNER JOIN
+            dim_products ON orders_table.product_code = dim_products.product_code
+    )::numeric, 2) AS Percentage
+
+FROM
+    orders_table
+INNER JOIN
+    dim_products ON orders_table.product_code = dim_products.product_code
+INNER JOIN
+    dim_store_details ON orders_table.store_code = dim_store_details.store_code
+GROUP BY 
+    store_type
+ORDER BY 
+    total_sales DESC;
+```
+
+Here you can see the use of a subquery in the third SELECT statement to retrieve the total sum of sales. This is then used to divide the sum of sales grouped by store type to get the percentage of sales by store type. 
+
+- Lastly I used Common Table Expressions (CTE) to make more complex queries. 
+
+```sql
+WITH next_sale AS(
+SELECT date_uuid, 
+	make_date(year::int, month::int, day::int) + timestamp AS sale,
+	LEAD(make_date(year::int, month::int, day::int) + timestamp)
+	OVER( ORDER BY make_date(year::int, month::int, day::int) + timestamp) AS next_sale
+FROM dim_date_times)
+
+SELECT
+	year, 
+	AVG(next_sale - sale) AS actual_time_taken
+FROM 
+	next_sale
+INNER JOIN 
+	dim_date_times ON next_sale.date_uuid = dim_date_times.date_uuid
+GROUP BY 
+	year
+ORDER BY 
+	actual_time_taken DESC
+LIMIT 5;
+```
+As you cannot apply aggregate functions to window functions it was necessary to construct a CTE which retrieves a column of the sale times as a timestamp and a column for the next sale times. I can then do a SELECT statement on the CTE to calculate the average time between each sale.
 
 
 
