@@ -128,25 +128,24 @@ class DataCleaning:
         # this is the method that will be used in the pd.apply() call
         def convert_to_kg(value): 
             
-            # some of the weight entries in the table dealing with multipack items are stored as '12 x 100g'. This if statement deals with them, first by removing the 'g' and then multiplying to get the total weight and then converting to kg
-            if 'x' in value:
-
-                x_index = value.index('x')
-                value = value.replace('g', '')
-                value = int(value[:x_index - 1]) * int(value[x_index + 2:])
-                value = float(value) / 1000
-                
-                value = str(value)
-
             # there are some weight entries with decimal points in weird places e.g. '77  .' which causes an error when trying to treat the value as a float due to the spaces between the integer and the decimal point. This regular expression removes everything but digits, decimal points and the weight metrics from the string. 
-            value = re.sub('[^0123456789\.kgml]', '', value)
+            value = re.sub('[^0123456789\.kgmlx]', '', value)
             
             # this if statement removes the weight metric and converts ml and g to kg.
             if 'kg' in value:
                value = value.replace('kg', '')
+
+            # some of the weight entries in the table dealing with multipack items are stored as '12 x 100g'. This if statement deals with them, first by removing the 'g' and then multiplying to get the total weight and then converting to kg
+            elif 'x' in value:
+                x_index = value.index('x')
+                value = value.replace('g', '')
+                value = int(value[:x_index]) * int(value[x_index + 1:])
+                value = float(value) / 1000
+
             elif 'ml' in value:
                 value = value.replace('ml', '')
                 value = float(value) / 1000 
+
             elif 'g' in value and 'k' not in value:
                 value = value.replace('g', '')
                 value = float(value) / 1000
@@ -247,6 +246,12 @@ class DataCleaning:
 
 
 
+
+
+
+cleaner = DataCleaning()
+
+cleaner.clean_products_data()
 
 
 
