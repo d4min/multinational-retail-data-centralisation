@@ -30,7 +30,7 @@ git clone git clone https://github.com/d4min/multinational-retail-data-centralis
 
     1. The DatabaseConnector class which will be used to connect to the database and upload the cleaned data ready for analysis.
 
-    1. The DataCleaning class which will include methods to clean the data from the various sources. 
+    1. The DataCleaning class which will include methods to clean the data from the various sources .
 
 - Created the following methods in the DatabaseConnector class which will be used to connect and retrieve data from the AWS database:
 
