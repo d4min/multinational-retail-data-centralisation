@@ -83,6 +83,7 @@ class DataCleaning:
         data_extractor = DataExtractor()
         table = data_extractor.retrieve_stores_data('https://aqj7u5id95.execute-api.eu-west-1.amazonaws.com/prod/store_details/{store_number}')
 
+
         # sets the index of the pandas dataframe 
         table.set_index('index', inplace=True)
 
@@ -104,7 +105,10 @@ class DataCleaning:
         table = table[~inconsistent_rows]   
 
         # removes any alphabetical characters from rows in the staff_numbers column using a regular expression so they are ready to be converted to data type int
-        table['staff_numbers'] = table['staff_numbers'].str.replace(r"[a-zA-z]", '')
+        def remove_chars(value):
+            return re.sub('[^0-9]+', '', value)
+        
+        table['staff_numbers'] = table['staff_numbers'].apply(remove_chars)
 
         # changes the staff_numbers data type to numberic so it can used for calculations
         table['staff_numbers'] = pd.to_numeric(table['staff_numbers'])
@@ -122,7 +126,7 @@ class DataCleaning:
     #  A function to clean the weight series from the dataframe so it is usable for calculations.
     def convert_product_weights(self, table):
         
-        # sets the column data type to string so because string methods are needed for some of the cleaning
+        # sets the column data type to string because string methods are needed for some of the cleaning
         table['weight'] = table['weight'].astype(str)
         
         # this is the method that will be used in the pd.apply() call
@@ -242,6 +246,13 @@ class DataCleaning:
         # uploads cleaned data to postgres
         db_connect = DatabaseConnector()
         db_connect.upload_to_db(table, 'dim_date_times')
+
+
+
+
+
+
+
 
 
 

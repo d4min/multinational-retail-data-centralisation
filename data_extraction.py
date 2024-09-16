@@ -77,7 +77,7 @@ class DataExtractor:
         address_list = s3_address.split('/')
 
         s3 = boto3.client('s3')
-        s3.download_file(address_list[-2], address_list[-1], '/Users/dns/AiCore/AiCore-Final/multinational-retail-data-centralisation/products.csv')
+        s3.download_file(address_list[-2], address_list[-1], '/Users/damin/Developer/AiCore/AiCore-Final/multinational-retail-data-centralisation/products.csv')
 
         # creates pandas dataframe, specifying column 0 is to be used as the index
         products_df = pd.read_csv('products.csv', index_col=0)

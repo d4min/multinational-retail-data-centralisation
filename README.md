@@ -381,8 +381,60 @@ LIMIT 5;
 ```
 As you cannot apply aggregate functions to window functions it was necessary to construct a CTE which retrieves a column of the sale times as a timestamp and a column for the next sale times. I can then do a SELECT statement on the CTE to calculate the average time between each sale.
 
+The entirety of the SQL queries can be found in the sales_data_queries.sql file within this repository. The results of the query are available within the images/SQL Queries folder. 
+
+## Power BI Visualisations
+
+With all of the retail business' data available in a centralised location it is now easier than ever to construct visualisations for stakeholders to use during decision making. 
+
+These visualisations allow us to transform the thousands of rows of data in our table into graphs and other visualisations that management can use to quickly analyse. 
+
+![Screenshot](images/PowerBI_Visualisations/By_Category.png)
+
+The above visualisation makes use of 4 different visualisation tools within PowerBI to present the number of orders in relation to the category of the order. 
+
+- Bar Chart: To clearly display the difference in number of orders depending on the category of product.
+
+- Line Graph: To showcase the change year to year of the orders each category has generated.
+
+- Card: To display the number of orders. 
+
+- Slicer: To filter the visualisations based upon a specific product category. 
+
+![Screenshot](images/PowerBI_Visualisations/By_Category_Sliced.png)
+
+Here we make use of the slicer to see the number of orders for the 'Pets' product category. 
+
+![Screenshot](images/PowerBI_Visualisations/By_Store.png)
+
+This visualisation uses a map as the main focus point to visually show the distribution of stores around the world the retailer has. This is useful for being able to quickly see the locations and regions where most stores have been opened and also the places where the business hasn't focused as much. 
+
+- Map: Showcases the distribution of stores, the bubble size is representative of number of orders that store has generated. 
+
+- Table: Allows us to view specific store addresses and the number of orders they have generated.
+
+- Slicer: Lets us segment the visualisations by country code. 
+
+- Card: Displays the number of orders. 
+
+![Screenshot](images/PowerBI_Visualisations/By_Store_Sliced.png)
+
+Here we have used the slicer to segment the visualisations to only show us the stores present in Great Britain. We can see from the map visual quickly which of the stores in London generates the most orders. 
 
 
+![Screenshot](images/PowerBI_Visualisations/By_Country.png)
 
+In the final visualisation we have presented the number of orders the store has generated within each of the countries it has a presence in. 
 
+- Line Graph: To showcase how the number of orders in relation to country has changed over the years the company has been active. Also includes an average line (the dotted line) which tells us the average orders generated.
+
+- Pie Chart: Visually show the portion in percentage each region holds of the total number of orders. 
+
+- Card: Display the number of orders.
+
+- Slicer: To segment the visualisations based on a specific country. 
+
+![Screenshot](images/PowerBI_Visualisations/By_Country_Sliced.png)
+
+Here we have segmented the visualisations to only display information about the orders in the US. 
 

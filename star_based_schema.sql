@@ -81,6 +81,7 @@ ALTER TABLE dim_store_details
 
 -- Create a new column 'weight-class' which gives each product a weight category. The weight categories are: Light, Mid-Sized, Heavy, Truck-Required. 
 
+/*
 UPDATE dim_products 
 SET product_price = REPLACE(product_price, '£', '');
 
@@ -129,6 +130,8 @@ UPDATE dim_products
 ALTER TABLE dim_products   
     ALTER COLUMN still_available TYPE BOOL USING still_available::BOOL;
 
+*/
+
 -- Casts columns in the dim_date_time table to the appropriate data types
 
 ALTER TABLE dim_date_times
@@ -165,8 +168,10 @@ ADD PRIMARY KEY (user_uuid);
 ALTER TABLE dim_card_details
 ADD PRIMARY KEY (card_number);
 
+/*
 ALTER TABLE dim_products
 ADD PRIMARY KEY (product_code);
+*/
 
 ALTER TABLE dim_store_details
 ADD PRIMARY KEY (store_code);
@@ -181,8 +186,10 @@ ADD PRIMARY KEY (date_uuid);
 ALTER TABLE orders_table
 ADD FOREIGN KEY (user_uuid) REFERENCES dim_users(user_uuid);
 
+/*
 ALTER TABLE orders_table
 ADD FOREIGN KEY (product_code) REFERENCES dim_products(product_code);
+*/
 
 ALTER TABLE orders_table
 ADD FOREIGN KEY (store_code) REFERENCES dim_store_details(store_code);
