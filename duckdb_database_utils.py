@@ -22,8 +22,10 @@ class DatabaseConnector:
         conn = duckdb.connect(':memory:') # In memory DuckDB database
 
         conn.execute(f"""
-        ATTACH 'postgres://{db_creds['RDS_USER']}:{db_creds['RDS_PASSWORD']}@{db_creds['RDS_HOST']}:{db_creds['RDS_PORT']}/{db_creds['RDS_DATABASE']}' 
-        AS postgres_db
+        INSTALL postgres;
+        LOAD postgres;
+        ATTACH 'postgres://{db_creds["RDS_USER"]}:{db_creds["RDS_PASSWORD"]}@{db_creds["RDS_HOST"]}:{db_creds["RDS_PORT"]}/{db_creds["RDS_DATABASE"]}' 
+        AS postgres_db;
         """)
 
         return conn

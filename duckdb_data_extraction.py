@@ -44,7 +44,7 @@ class DataExtractor:
         """
         url = endpoint
 
-        connect = DatabaseConnector
+        connect = DatabaseConnector()
         headers = connect.read_db_creds('api_key.yaml')
 
         response = requests.get(url, headers=headers)
@@ -60,7 +60,7 @@ class DataExtractor:
         """
         url = endpoint 
 
-        connect = DatabaseConnector
+        connect = DatabaseConnector()
         headers = connect.read_db_creds('api_key.yaml')
 
         number_of_stores = self.list_number_of_stores('https://aqj7u5id95.execute-api.eu-west-1.amazonaws.com/prod/number_stores')
@@ -93,12 +93,14 @@ class DataExtractor:
 
         # Instead of downloading to disk, get object and read directly
         response = s3.get_object(Bucket=bucket, Key=key)
-        csv_content = response['Body'].read()
-
+        # Read the CSV content into a pandas DataFrame first
+        df = pd.read_csv(io.BytesIO(response['Body'].read()))
+    
+        # Then convert to DuckDB
         conn = duckdb.connect(':memory:')
-        conn.execute(f"CREATE VIEW products_view AS SELECT * FROM read_csv_auto('{io.BytesIO(csv_content)}', header=true, index_col=0)")   
+        conn.register('temp_df', df)
 
-        products_df = conn.execute("SELECT * FROM products_view").df()
+        products_df = conn.execute("SELECT * FROM temp_df").df()
 
         return products_df
     
