@@ -113,3 +113,27 @@ table = self.conn.execute("""
     - SQL operations for filtering and simple transformations
     - Pandas operations for complex sting manipulations and date handling 
     - In-memory DuckDB for intermediate operations 
+
+## Performance Results 
+
+The benchmark testing revealed modest performance differences on my dataset size:
+
+| Method | Pandas Time | DuckDB Time | Speedup
+|----------|----------|----------|----------|
+| Extract Users    | 0.856s    | 0.723s | 1.18x
+| Clean Product Data    | 1.245s     | 0.982s | 1.27x
+| Process Orders | 0.634s| 0.511s | 1.24x
+
+While these improvements are relatively small (18-27%), there are indications that the benefits would be more pronounced with larger datasets.
+
+## Lessons Learned 
+
+1. **SQL-First Approach**: DuckDB's SQL interface provided a more intuitive way to express certain data transformations that were complex in pandas.
+2. **Hybrid Implementation**: The most effective approach was using DuckDB for filtering and aggregation operations while maintaining pandas for complex string manipulations and certain date operations.
+3. **Memory Efficiency**: While not dramatically faster for this dataset size, the DuckDB implementation showed promising memory usage patterns that would benefit larger datasets.
+4. **Integration Ease**: DuckDB integrated smoothly with existing PostgreSQL infrastructure, requiring minimal changes to the overall architecture.
+
+## Conclusion 
+For this specific project, the performance gains didn't justify a complete rewrite. However, the exercise provided valuable insights into alternative data processing approaches, and the DuckDB implementation has potential advantages for future scaling as the dataset grows.
+The code remains modular enough that switching between implementations or creating a hybrid approach would be straightforward if dataset characteristics change in the future.
+
