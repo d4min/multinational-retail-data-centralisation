@@ -246,16 +246,3 @@ class DataCleaning:
         # uploads cleaned data to postgres
         db_connect = DatabaseConnector()
         db_connect.upload_to_db(table, 'dim_date_times')
-
-
-
-
-
-
-
-
-
-
-
-
-
