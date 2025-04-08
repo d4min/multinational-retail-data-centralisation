@@ -41,3 +41,21 @@ conn.execute(f"""
     (FORMAT POSTGRES, TABLE '{table_name}', CREATE_TABLE TRUE, OVERWRITE_OR_IGNORE TRUE)
     """)
 ```
+
+### 2. Data Extraction (data_extraction.py vs duckdb_data_extraction.py)
+
+#### Key Differences:
+1. **API Data Handling**:
+- Original: Uses Pandas DataFrame for storing API responses
+- DuckDB: Initially cretes Pandas DataFrame then converts to DuckDB
+- Future Optimisation: Could directly insert API responses into DuckDB tables using SQL operations. 
+
+```python
+# Original Pandas Implementation
+stores_df = pd.DataFrame(stores_list)
+
+# DuckDB Implementation
+stores_df = pd.DataFrame(stores_list)
+conn = duckdb.connect(':memory:')
+duckdb_df = conn.from_df(stores_df)
+```
