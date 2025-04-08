@@ -59,3 +59,57 @@ stores_df = pd.DataFrame(stores_list)
 conn = duckdb.connect(':memory:')
 duckdb_df = conn.from_df(stores_df)
 ```
+
+### 3. Data Cleaning (data_cleaning.py vs duckdb_data_cleaning.py)
+
+#### Key Differences:
+
+1. **SQL-Based Filtering**:
+```python
+# Original Pandas: Filterinconsistent_categories = set(table['country_code']) - country_codes
+inconsistent_rows = table['country_code'].isin(inconsistent_categories)
+table = table[~inconsistent_rows]
+
+# DuckDB: Use SQL for filtering
+table = self.conn.execute(f"""
+    SELECT *
+    FROM store_data
+    WHERE country_code IN ('GB', 'US', 'DE')
+""").df()
+```
+
+2. **Data Type Handling**:
+```python
+# Original Pandas: Chain multiple operations
+table['country_code'] = table['country_code'].astype('category')
+table['continent'] = table['continent'].astype('category')
+table['store_type'] = table['store_type'].astype('category')
+
+# DuckDB optimisation
+table = self.conn.execute("""
+    SELECT 
+        TRY_CAST(date_added AS DATE) as date_added,
+        -- other columns
+    FROM products
+""").df()
+```
+
+3. **String Operations**:
+```python
+# Original Pandas: Use pandas string methods
+table['continent'] = table['continent'].str.replace('ee', '')
+
+# DuckDB: Use SQL string functions
+table = self.conn.execute("""
+    SELECT
+        REPLACE(continent, 'ee', '') AS continent,
+        -- other columns
+    FROM store_data
+""").df()
+```
+
+4. **Hybrid Approach**:
+- The DuckDB implementation uses a hybrid approach:
+    - SQL operations for filtering and simple transformations
+    - Pandas operations for complex sting manipulations and date handling 
+    - In-memory DuckDB for intermediate operations 
