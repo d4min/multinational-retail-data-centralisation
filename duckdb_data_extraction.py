@@ -5,6 +5,7 @@ import tabula
 import requests
 import json
 import boto3
+import io
 
 class DataExtractor:
 
@@ -36,4 +37,80 @@ class DataExtractor:
         result = connection.execute("SELECT * FROM pdf_table_view").df()
     
         return result
+    
+    def list_number_of_stores(self, endpoint):
+        """
+        Sends an API request to retrieve the number of stores
+        """
+        url = endpoint
+
+        connect = DatabaseConnector
+        headers = connect.read_db_creds('api_key.yaml')
+
+        response = requests.get(url, headers=headers)
+
+        data = response.json()
+        number_of_stores = data['number_stores']
+
+        return number_of_stores
+    
+    def retrieve_stores_data(self, endpoint):
+        """
+        Retrieves each stores data and saves them in a DuckDB DataFrame
+        """
+        url = endpoint 
+
+        connect = DatabaseConnector
+        headers = connect.read_db_creds('api_key.yaml')
+
+        number_of_stores = self.list_number_of_stores('https://aqj7u5id95.execute-api.eu-west-1.amazonaws.com/prod/number_stores')
+
+        stores_list = []
+
+        for i in range(number_of_stores):
+            new_url = url.replace('{store_number}', str(i))
+            response = requests.get(new_url, headers=headers)
+            data = response.json()
+            stores_list.append(data)
+        
+        stores_df = pd.DataFrame(stores_list)
+
+        # Convert to DuckDB DataFrame
+        conn = duckdb.connect(':memory:')
+        duckdb_df = conn.from_df(stores_df)
+
+        return duckdb_df.df()
+    
+    def extact_from_s3(self, s3_address):
+        """
+        Uses boto3 to extract a CSV file from an s3 bucket and loads it using DuckDB
+        """
+        address_list = s3_address.split('/')
+        bucket = address_list[-2]
+        key = address_list[-1]
+
+        s3 = boto3.client('s3')
+
+        # Instead of downloading to disk, get object and read directly
+        response = s3.get_object(Bucket=bucket, Key=key)
+        csv_content = response['Body'].read()
+
+        conn = duckdb.connect(':memory:')
+        conn.execute(f"CREATE VIEW products_view AS SELECT * FROM read_csv_auto('{io.BytesIO(csv_content)}', header=true, index_col=0)")   
+
+        products_df = conn.execute("SELECT * FROM products_view").df()
+
+        return products_df
+    
+         
+
+
+        
+
+
+    
+    
+
+
+
 
