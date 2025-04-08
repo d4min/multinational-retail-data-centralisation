@@ -1,5 +1,4 @@
 import yaml 
-import psycopg2
 import duckdb 
 
 class DatabaseConnector:
