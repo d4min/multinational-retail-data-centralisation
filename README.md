@@ -124,6 +124,8 @@ The benchmark testing revealed modest performance differences on my dataset size
 | Clean Product Data    | 1.245s     | 0.982s | 1.27x
 | Process Orders | 0.634s| 0.511s | 1.24x
 
+![A diagram showing performance improvements](pandas_vs_duckdb_benchmarks.png)
+
 While these improvements are relatively small (18-27%), there are indications that the benefits would be more pronounced with larger datasets.
 
 ## Lessons Learned 
